@@ -1,0 +1,20 @@
+inc/Module/Install.pm
+inc/Module/Install/AutoManifest.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+lib/App/Cmd/Plugin/Prompt.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
+t/lib/TestApp.pm
+t/lib/TestApp/Command/any.pm
+t/lib/TestApp/Command/str.pm
+t/lib/TestApp/Command/yn.pm
+t/load.t

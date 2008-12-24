@@ -1,0 +1,22 @@
+---
+abstract: 'plug prompting routines into your commands'
+author:
+  - 'Ricardo SIGNES, C<< <rjbs@cpan.org> >>'
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+module_name: App::Cmd::Plugin::Prompt
+name: App-Cmd-Plugin-Prompt
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  App::Cmd: 0.2
+  Term::ReadKey: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 1.000
