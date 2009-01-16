@@ -19,4 +19,5 @@ requires:
   Term::ReadKey: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.000
+  repository: http://github.com/rjbs/app-cmd-plugin-prompt
+version: 1.001
