@@ -5,7 +5,7 @@ use App::Cmd::Setup -plugin => {
   exports => [ qw(prompt_str prompt_yn prompt_any_key) ],
 };
 
-our $VERSION = '1.001';
+our $VERSION = '1.002';
 
 use Term::ReadKey;
 
@@ -149,7 +149,7 @@ sub prompt_yn {
               : $opt->{default}               ? 'Y/n'
               :                                 'y/N';
 
-  my $default = $opt->{default} =~ /\d/
+  my $default = ($opt->{default}||'') =~ /\A\d\z/
               ? ($opt->{default} ? 'y' : 'n')
               : $opt->{default};
 

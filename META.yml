@@ -2,8 +2,12 @@
 abstract: 'plug prompting routines into your commands'
 author:
   - 'Ricardo SIGNES, C<< <rjbs@cpan.org> >>'
+build_requires:
+  ExtUtils::MakeMaker: 6.42
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.91'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -20,4 +24,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: http://github.com/rjbs/app-cmd-plugin-prompt
-version: 1.001
+version: 1.002
