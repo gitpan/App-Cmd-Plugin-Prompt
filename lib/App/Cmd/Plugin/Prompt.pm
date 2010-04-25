@@ -5,7 +5,7 @@ use App::Cmd::Setup -plugin => {
   exports => [ qw(prompt_str prompt_yn prompt_any_key) ],
 };
 
-our $VERSION = '1.002';
+our $VERSION = '1.003';
 
 use Term::ReadKey;
 
@@ -19,7 +19,7 @@ In your app:
 
   package MyApp;
   use App::Cmd::Setup -app => {
-    plugins => [ qw(App::Cmd::Plugin::Prompt) ],
+    plugins => [ qw(Prompt) ],
   };
 
 In your command:
