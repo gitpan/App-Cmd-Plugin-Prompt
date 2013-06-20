@@ -1,17 +1,106 @@
 use strict;
 use warnings;
 package App::Cmd::Plugin::Prompt;
+{
+  $App::Cmd::Plugin::Prompt::VERSION = '1.004';
+}
+# ABSTRACT: plug prompting routines into your commands
 use App::Cmd::Setup -plugin => {
   exports => [ qw(prompt_str prompt_yn prompt_any_key) ],
 };
 
-our $VERSION = '1.003';
-
 use Term::ReadKey;
+
+
+sub prompt_str {
+  my ($plugin, $cmd, $message, $opt) = @_;
+  if ($opt->{default} && $opt->{valid} && ! $opt->{no_valid_default}) {
+    Carp::croak(
+      $opt->{invalid_default_error} || "'default' must pass 'valid' parameter"
+    ) unless $opt->{valid}->($opt->{default});
+  }
+  $opt->{input}  ||= sub { scalar <STDIN> };
+  $opt->{valid}  ||= sub { 1 };
+  $opt->{output} ||= sub {
+    if (defined $_[1]) {
+      printf "%s [%s]: ", @_;
+    } else {
+      printf "%s: ", $_[0];
+    }
+  };
+
+  my $response;
+  while (!defined($response) || !$opt->{valid}->($response)) {
+    $opt->{output}->(
+      $message,
+      ($opt->{choices} || $opt->{default} || undef),
+    );
+    $response = $opt->{input}->();
+    chomp($response);
+    if ($opt->{default} && ! length($response)) {
+      $response = $opt->{default};
+    }
+  }
+  return $response;
+}
+
+
+sub prompt_yn {
+  my ($plugin, $cmd, $message, $opt) = @_;
+
+  Carp::croak("default must be y or n or 0 or 1")
+    if defined $opt->{default}
+    and $opt->{default} !~ /\A[yn01]\z/;
+
+  my $choices = (not defined $opt->{default}) ? 'y/n'
+              : $opt->{default} eq 'y'        ? 'Y/n'
+              : $opt->{default} eq 'n'        ? 'y/N'
+              : $opt->{default}               ? 'Y/n'
+              :                                 'y/N';
+
+  my $default = ($opt->{default}||'') =~ /\A\d\z/
+              ? ($opt->{default} ? 'y' : 'n')
+              : $opt->{default};
+
+  my $response = $plugin->prompt_str(
+    $cmd,
+    $message,
+    {
+      choices => $choices,
+      valid   => sub { lc($_[0]) eq 'y' || lc($_[0]) eq 'n' },
+      default => $default,
+    },
+  );
+
+  return lc($response) eq 'y';
+}
+
+
+sub prompt_any_key {
+  my ($plugin, $cmd, $prompt) = @_;
+
+  $prompt ||= "press any key to continue";
+  print $prompt;
+  Term::ReadKey::ReadMode 'cbreak';
+  Term::ReadKey::ReadKey(0);
+  Term::ReadKey::ReadMode 'normal';
+  print "\n";
+}
+
+
+1;
+
+__END__
+
+=pod
 
 =head1 NAME
 
 App::Cmd::Plugin::Prompt - plug prompting routines into your commands
+
+=head1 VERSION
+
+version 1.004
 
 =head1 SYNOPSIS
 
@@ -88,40 +177,6 @@ coderef)
 
 =back
 
-=cut
-
-sub prompt_str {
-  my ($plugin, $cmd, $message, $opt) = @_;
-  if ($opt->{default} && $opt->{valid} && ! $opt->{no_valid_default}) {
-    Carp::croak(
-      $opt->{invalid_default_error} || "'default' must pass 'valid' parameter"
-    ) unless $opt->{valid}->($opt->{default});
-  }
-  $opt->{input}  ||= sub { scalar <STDIN> };
-  $opt->{valid}  ||= sub { 1 };
-  $opt->{output} ||= sub {
-    if (defined $_[1]) {
-      printf "%s [%s]: ", @_;
-    } else {
-      printf "%s: ", $_[0];
-    }
-  };
-
-  my $response;
-  while (!defined($response) || !$opt->{valid}->($response)) {
-    $opt->{output}->(
-      $message,
-      ($opt->{choices} || $opt->{default} || undef),
-    );
-    $response = $opt->{input}->();
-    chomp($response);
-    if ($opt->{default} && ! length($response)) {
-      $response = $opt->{default};
-    }
-  }
-  return $response;
-}
-
 =head2 prompt_yn
 
   my $bool = prompt_yn($prompt, \%opt);
@@ -134,38 +189,6 @@ Valid options are:
  default: may be yes or no, indicating how to interpret an empty response;
           if empty, require an explicit answer; defaults to empty
 
-=cut
-
-sub prompt_yn {
-  my ($plugin, $cmd, $message, $opt) = @_;
-
-  Carp::croak("default must be y or n or 0 or 1")
-    if defined $opt->{default}
-    and $opt->{default} !~ /\A[yn01]\z/;
-
-  my $choices = (not defined $opt->{default}) ? 'y/n'
-              : $opt->{default} eq 'y'        ? 'Y/n'
-              : $opt->{default} eq 'n'        ? 'y/N'
-              : $opt->{default}               ? 'Y/n'
-              :                                 'y/N';
-
-  my $default = ($opt->{default}||'') =~ /\A\d\z/
-              ? ($opt->{default} ? 'y' : 'n')
-              : $opt->{default};
-
-  my $response = $plugin->prompt_str(
-    $cmd,
-    $message,
-    {
-      choices => $choices,
-      valid   => sub { lc($_[0]) eq 'y' || lc($_[0]) eq 'n' },
-      default => $default,
-    },
-  );
-
-  return lc($response) eq 'y';
-}
-
 =head2 prompt_any_key($prompt)
 
   my $input = prompt_any_key($prompt);
@@ -173,32 +196,19 @@ sub prompt_yn {
 This routine prompts the user to "press any key to continue."  (C<$prompt>, if
 supplied, is the text to prompt with.
 
-=cut
-
-sub prompt_any_key {
-  my ($plugin, $cmd, $prompt) = @_;
-
-  $prompt ||= "press any key to continue";
-  print $prompt;
-  Term::ReadKey::ReadMode 'cbreak';
-  Term::ReadKey::ReadKey(0);
-  Term::ReadKey::ReadMode 'normal';
-  print "\n";
-}
-
 =head1 SEE ALSO
 
 L<App::Cmd>
 
 =head1 AUTHOR
 
-Ricardo SIGNES, C<< <rjbs@cpan.org> >>
+Ricardo Signes <rjbs@cpan.org>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2004-2006 Ricardo SIGNES.  This program is free software;  you can
-redistribute it and/or modify it under the same terms as Perl itself.
+This software is copyright (c) 2004 by Ricardo Signes.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-1;
