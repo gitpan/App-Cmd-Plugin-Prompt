@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package App::Cmd::Plugin::Prompt;
 {
-  $App::Cmd::Plugin::Prompt::VERSION = '1.004';
+  $App::Cmd::Plugin::Prompt::VERSION = '1.005';
 }
 # ABSTRACT: plug prompting routines into your commands
 use App::Cmd::Setup -plugin => {
@@ -100,7 +100,7 @@ App::Cmd::Plugin::Prompt - plug prompting routines into your commands
 
 =head1 VERSION
 
-version 1.004
+version 1.005
 
 =head1 SYNOPSIS
 
